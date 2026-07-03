@@ -1,0 +1,3 @@
+# Ignore credentials notebook file containing sensitive private keys
+notebooks/Credentials.py
+notebooks/Credentials
