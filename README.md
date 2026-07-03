@@ -10,10 +10,11 @@ This directory contains the complete implementation for running the **Mobile Bra
 databricks_pipeline/
 ├── README.md                 ← This guide
 ├── notebooks/
-│   ├── 01_transform_excel.py ← Reads GCS Excel files, extracts sheets, writes CSVs
-│   ├── 02_bronze_layer.py     ← PySpark: Reads CSVs, validates, writes Delta Bronze
-│   ├── 03_silver_layer.py     ← PySpark: Deduplicates and standardizes to Delta Silver
-│   ├── 04_gold_layer.py       ← PySpark: Joins with BigQuery dims, writes Gold layer
+│   ├── 00_generate_excel.py   ← Python: Generates mock distributor Excel files to GCS
+│   ├── 01_transform_excel.py  ← Python: Reads GCS Excel files, extracts sheets, writes CSVs
+│   ├── 02_bronze_layer.ipynb  ← PySpark: Reads CSVs, validates, writes Delta Bronze
+│   ├── 03_silver_layer.ipynb  ← PySpark: Deduplicates and standardizes to Delta Silver
+│   ├── 04_gold_layer.ipynb    ← PySpark: Joins with BigQuery dims, writes Gold layer
 │   └── 05_archival.py         ← Python/DBUtils: Archives processed Excel files
 └── workflows/
     └── workflow_definition.json ← JSON import definition for Databricks Workflow
