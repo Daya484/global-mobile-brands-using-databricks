@@ -40,12 +40,12 @@ today_yyyymmdd = run_date.replace("-", "") if run_date else date.today().strftim
 logger.info(f"Mock Excel generation started for Env: {env} | Bucket: {source_bucket_name} | Date: {today_yyyymmdd}")
 
 # COMMAND ----------
-# Configure GCS Authentication using Service Account Key
-# PASTE YOUR GCP SERVICE ACCOUNT JSON KEY CONTENT INSIDE THE TRIPLE QUOTES BELOW
-gcp_key_json = """"""
+# MAGIC %run ./Credentials
 
+# COMMAND ----------
+# Configure GCS Authentication using Service Account Key
 try:
-    if gcp_key_json.strip():
+    if 'gcp_key_json' in locals() and gcp_key_json.strip():
         info = json.loads(gcp_key_json)
         credentials = service_account.Credentials.from_service_account_info(info)
         client = storage.Client(credentials=credentials, project=info.get("project_id"))

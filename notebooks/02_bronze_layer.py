@@ -29,17 +29,17 @@ if not source_bucket or not pipeline_bucket:
     raise ValueError("Parameters 'source_bucket' and 'pipeline_bucket' are required.")
 
 # COMMAND ----------
-# Configure GCS Authentication in Spark
-# PASTE YOUR GCP SERVICE ACCOUNT JSON KEY CONTENT INSIDE THE TRIPLE QUOTES BELOW
-gcp_key_json = """"""
+# MAGIC %run ./Credentials
 
+# COMMAND ----------
+# Configure GCS Authentication in Spark
 try:
-    if gcp_key_json.strip():
+    if 'gcp_key_json' in locals() and gcp_key_json.strip():
         spark.conf.set("google.cloud.auth.service.account.enable", "true")
         spark.conf.set("google.cloud.auth.service.account.json.keyfile.data", gcp_key_json)
         print("GCS Authentication configured in Spark Session using direct JSON key.")
     else:
-        print("gcp_key_json variable is empty. Attempting default environment credentials.")
+        print("gcp_key_json variable is empty or not defined. Attempting default environment credentials.")
 except Exception as e:
     print(f"Using default GCP environment authentication / Error: {e}")
 

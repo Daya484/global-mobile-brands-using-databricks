@@ -36,18 +36,18 @@ run_date_yyyymmdd = archive_date.replace("-", "")
 logger.info(f"Archival Started for Env: {env} | Bucket: {source_bucket_name} | Date: {archive_date}")
 
 # COMMAND ----------
-# Initialize GCS client using Service Account Key
-# PASTE YOUR GCP SERVICE ACCOUNT JSON KEY CONTENT INSIDE THE TRIPLE QUOTES BELOW
-gcp_key_json = """"""
+# MAGIC %run ./Credentials
 
+# COMMAND ----------
+# Initialize GCS client using Service Account Key
 try:
-    if gcp_key_json.strip():
+    if 'gcp_key_json' in locals() and gcp_key_json.strip():
         info = json.loads(gcp_key_json)
         credentials = service_account.Credentials.from_service_account_info(info)
         client = storage.Client(credentials=credentials, project=info.get("project_id"))
         logger.info("Successfully authenticated GCS storage client using direct JSON key.")
     else:
-        logger.warning("gcp_key_json variable is empty. Attempting default credentials.")
+        logger.warning("gcp_key_json variable is empty or not defined. Attempting default credentials.")
         client = storage.Client()
 except Exception as e:
     logger.error(f"Authentication failed: {e}. Falling back to default credentials.")
