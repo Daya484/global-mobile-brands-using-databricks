@@ -3,7 +3,26 @@
   "description": "Orchestrates the Mobile Brands data engineering pipeline in Databricks (Ingest -> Transform -> Bronze -> Silver -> Gold -> Archive)",
   "tasks": [
     {
+      "task_key": "00_generate_excel",
+      "notebook_task": {
+        "notebook_path": "/Repos/Daya484/global-mobile-brands-using-databricks/notebooks/00_generate_excel",
+        "base_parameters": {
+          "env": "pd",
+          "source_bucket": "mb-data-pd-495516",
+          "run_date": "{{job.start_time.yyyy_mm_dd}}"
+        }
+      },
+      "job_cluster_key": "shared_job_cluster",
+      "timeout_seconds": 600,
+      "email_notifications": {}
+    },
+    {
       "task_key": "01_transform_excel",
+      "depends_on": [
+        {
+          "task_key": "00_generate_excel"
+        }
+      ],
       "notebook_task": {
         "notebook_path": "/Repos/Daya484/global-mobile-brands-using-databricks/notebooks/01_transform_excel",
         "base_parameters": {
