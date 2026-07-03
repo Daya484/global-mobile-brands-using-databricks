@@ -1,0 +1,126 @@
+{
+  "name": "pd_mobile_brands_pipeline_serverless",
+  "description": "Orchestrates the Mobile Brands data engineering pipeline in Databricks (Ingest -> Transform -> Bronze -> Silver -> Gold -> Archive)",
+  "tasks": [
+    {
+      "task_key": "01_transform_excel",
+      "notebook_task": {
+        "notebook_path": "/Repos/Daya484/global-mobile-brands-using-databricks/notebooks/01_transform_excel",
+        "base_parameters": {
+          "env": "pd",
+          "source_bucket": "mb-data-pd-495516",
+          "run_date": "{{job.start_time.yyyy_mm_dd}}"
+        }
+      },
+      "job_cluster_key": "shared_job_cluster",
+      "timeout_seconds": 600,
+      "email_notifications": {}
+    },
+    {
+      "task_key": "02_bronze_layer",
+      "depends_on": [
+        {
+          "task_key": "01_transform_excel"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Repos/Daya484/global-mobile-brands-using-databricks/notebooks/02_bronze_layer",
+        "base_parameters": {
+          "env": "pd",
+          "source_bucket": "mb-data-pd-495516",
+          "pipeline_bucket": "mb-pipeline-pd-495516",
+          "run_id": "{{job.run_id}}"
+        }
+      },
+      "job_cluster_key": "shared_job_cluster",
+      "timeout_seconds": 1200,
+      "email_notifications": {}
+    },
+    {
+      "task_key": "03_silver_layer",
+      "depends_on": [
+        {
+          "task_key": "02_bronze_layer"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Repos/Daya484/global-mobile-brands-using-databricks/notebooks/03_silver_layer",
+        "base_parameters": {
+          "env": "pd",
+          "pipeline_bucket": "mb-pipeline-pd-495516",
+          "dt": "{{job.start_time.yyyy_mm_dd}}",
+          "run_id": "{{job.run_id}}"
+        }
+      },
+      "job_cluster_key": "shared_job_cluster",
+      "timeout_seconds": 1200,
+      "email_notifications": {}
+    },
+    {
+      "task_key": "04_gold_layer",
+      "depends_on": [
+        {
+          "task_key": "03_silver_layer"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Repos/Daya484/global-mobile-brands-using-databricks/notebooks/04_gold_layer",
+        "base_parameters": {
+          "env": "pd",
+          "pipeline_bucket": "mb-pipeline-pd-495516",
+          "project_id": "pd-env-495516",
+          "dataset": "mobile_brands",
+          "run_id": "{{job.run_id}}"
+        }
+      },
+      "job_cluster_key": "shared_job_cluster",
+      "timeout_seconds": 1800,
+      "email_notifications": {}
+    },
+    {
+      "task_key": "05_archival",
+      "depends_on": [
+        {
+          "task_key": "04_gold_layer"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Repos/Daya484/global-mobile-brands-using-databricks/notebooks/05_archival",
+        "base_parameters": {
+          "env": "pd",
+          "source_bucket": "mb-data-pd-495516",
+          "run_date": "{{job.start_time.yyyy_mm_dd}}"
+        }
+      },
+      "job_cluster_key": "shared_job_cluster",
+      "timeout_seconds": 600,
+      "email_notifications": {}
+    }
+  ],
+  "job_clusters": [
+    {
+      "job_cluster_key": "shared_job_cluster",
+      "new_cluster": {
+        "spark_version": "14.3.x-scala2.12",
+        "gcp_attributes": {
+          "use_preemptible_executors": true,
+          "google_service_account": "mb-pipeline-sa@pd-env-495516.iam.gserviceaccount.com"
+        },
+        "node_type_id": "n1-standard-4",
+        "autoscale": {
+          "min_workers": 1,
+          "max_workers": 4
+        },
+        "spark_conf": {
+          "spark.sql.adaptive.enabled": "true"
+        }
+      }
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 0 1 * * ?",
+    "timezone_id": "UTC",
+    "pause_status": "PAUSED"
+  },
+  "max_concurrent_runs": 1
+}
